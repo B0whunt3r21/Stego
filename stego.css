@@ -1,0 +1,75 @@
+#body {
+    padding: 2;
+    margin: 1;
+    width: 150;
+    background: #2F6B6B;
+    color: #FFEFC5;
+}
+
+
+#header {
+    height: auto;
+    align: center middle;
+    margin: 2;
+}
+
+#logo {
+    width: 25%;
+    height: auto;
+}
+
+#title {
+    min-height: 3;
+    text-align: center;
+    margin-left: 25;
+    background: #B2964E;
+    border: heavy #FFB700;
+    color: #FFEFC5;
+    width: 50%;
+    text-style: bold;
+}
+
+
+#btn_toggle {
+    background: #3E467A;
+}
+
+#btn_toggle > .switch--slider {
+    color: #1737FF;
+    background: #5C70EA;
+}
+
+
+#out_row, #pwd_row, #tgl_row {
+    height: auto;
+    align: left middle;
+    margin: 2;
+}
+
+#imSel, #tgl, #pwd, #btn #out_name {
+    height: 100%;
+    min-height: 3;
+    align: center middle;
+    color: #FFEFC5;
+}
+
+
+#out_name, #pwd_in {
+    width: 25%;
+}
+
+
+#lbl_img, #lbl_out, #lbl_pwd {
+    width: 20;
+    align: right middle;
+    color: #FFEFC5;
+}
+
+
+#lbl_encode, #lbl_decode {
+    width: auto;
+    text-align: center;
+    color: #FFEFC5;
+}
+
+
