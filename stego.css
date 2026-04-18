@@ -1,30 +1,48 @@
 /*Scroll*/
 #scroll {
     content-align: center top;
-    max-width: 100;
+    max-width: 150;
 }
 
 
 /* GRID LAYOUT */
 #body {
-    max-width: 100;
+    max-width: 140;
     layout: grid;
     grid-size: 2;
     grid-rows: auto auto auto auto;
     grid-gutter: 1;
-    padding: 2;
-    margin: 0;
+    padding: 1;
+    margin: 1;
     background: #2F6B6B;
     color: #FFEFC5;
 }
 
 
 /*Cells*/
-#favicon, #header, #imgSel, #txtSel, #tgl, #out_file, #pwd, #btn {
+#favicon, #out_file {
+    height: auto;
+    content-align: left middle;
+    max-width: 70;
+    padding: 0;
+    margin: 0;
+}
+
+#header, #tgl, #pwd, #btn {
     height: auto;
     align: center middle;
-    max-width: 50;
+    max-width: 70;
 }
+
+#img_select, #text_select {
+    height: auto;
+    content-align: left middle;
+    max-width: 105;
+    padding: 0;
+    margin: 0;
+    column-span: 2;
+}
+
 
 
 /* LOGO */
@@ -40,25 +58,23 @@
     border: heavy #FFB700;
     color: #FFEFC5;
     content-align: center middle;
-    max-width: 45;
+    max-width: 50;
+    padding: 0;
+    margin: 0;
 }
 
 /* BUTTONS */
-#img_select, #text_select, #btn_run {
-    background: #3E467A;
-    max-width: 25;
-}
-
 #btn_run {
     color: #FFB700;
     border: heavy #B2964E;
+    background: #3E467A;
     max-width: 25;
 }
 
 /* SWITCH SLIDER */
 #btn_toggle {
     background: #3E467A;
-    max-width: 20;
+    max-width: 25;
 }
 
 #btn_toggle > .switch--slider {
@@ -66,12 +82,17 @@
     background: #5C70EA;
 }
 
+/*INPUTS*/
+#out_name, #pwd_in {
+    max-width: 35;
+}
+
 
 /* LABELS */
 #lbl_out, #lbl_pwd{
     content-align: right middle;
     color: #FFEFC5;
-    max-width: 25;
+    max-width: 35;
 }
 
 #lbl_encode {
@@ -86,20 +107,58 @@
     max-width: 15;
 }
 
+
+/* DIRECTORY TREE */
+#fileSelect {
+    height: auto;
+    max-width: 105;
+    background: #3E467A;
+}
+
+#toolbar {
+    height: auto;
+    max-width: 105;
+    max-height: 3;
+    background: #5C70EA;
+    color: #FFEFC5;
+    padding: 0;
+    margin: 0;
+}
+
+#tree {
+    background: #0e1435;
+    height: auto;
+    max-width: 105;
+}
+
 #lbl_img {
     content-align: center middle;
     color: #FFEFC5;
-    max-width: 25;
+    max-width: 105;
+    width: 100%;
+    background: #3E467A;
 }
 
-/* DIRECTORY TREE */
-#tree, #img_select, #text_select {
-    height: auto;
-    max-width: 80;
-    width: 25;
+#btn_up {
+    background: #B2964E;
+    color: #FFEFC5;
+    max-width: 5;
+    max-height: 3;
+    padding: 0;
+    margin: 0;
 }
 
-#tglSpacer, #outSpacer {
-    width: 0;
-    max-width: 10;
+#breadcrumb {
+    max-width: 105;
+    color: #FFEFC5;
 }
+
+
+/*SPACER*/
+#spacer_tgl, #spacer_out {
+    max-width: 70;
+    padding: 0;
+    margin: 0;
+}
+
+

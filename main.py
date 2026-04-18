@@ -65,33 +65,171 @@ class IMG(Static):
 
 
 
+class DirTree(DirectoryTree):
+    def __init__(self, path, selector=None, **kwargs):
+        super().__init__(path, **kwargs)
+        self.__selector = selector
+
+    @property
+    def selector(self):
+        return self.__selector
+    
+    @selector.setter
+    def selector(self, selector):
+        self.__selector = selector
+
+
+    def filter_paths(self, paths):
+        filtered = [
+            path for path in paths
+            if not path.name.startswith(".")
+            ]
+        
+        if not self.selector:
+            return filtered
+        else:
+            return [
+                p for p in filtered
+                if p.is_dir() or p.suffix.lower() == self.selector.lower()
+            ]
+    
+
+
+
 class FileSelect(Static):
-    def __init__(self, path, title, **kwargs):
+    def __init__(self, path, title, filter=None, **kwargs):
         super().__init__(**kwargs)
-        self.path = path
-        self.title = title
-        self.selected_path: Path | None = None
+        self.__path = Path(path).resolve()
+        self.__title = title
+        self.__selected_file: Path | None = None
+        self.__filter = filter
+        self.__replacing = False
+
+
+    @property
+    def path(self):
+        return self.__path
+    
+    @path.setter
+    def path(self, path):
+        self.__path = Path(path).resolve()
+    
+    @property
+    def title(self):
+        return self.__title
+    
+    @title.setter
+    def title(self, title):
+        self.__title = title
+
+    @property
+    def selected_file(self):
+        return self.__selected_file
+    
+    @selected_file.setter
+    def selected_file(self, selected_file):
+        self.__selected_file = selected_file
+
+    @property
+    def filter(self):
+        return self.__filter
+    
+    @filter.setter
+    def filter(self, filter):
+        self.__filter = filter
+
+
+    BINDINGS = [
+        ("backspace", "go_up", "Go Up")
+        ,("u", "rootPath", "User Root")
+        ,("p", "projPath", "Project Root")
+    ]
+
+    
+    def action_rootPath(self):
+        root = Path.home()
+        if not root.exists():
+            root = Path('./in/').resolve()
+        self.replaceTree(root)
+
+
+    def action_projPath(self):
+        root = Path('.').resolve()
+        self.replaceTree(root)
+
+    
+    def action_go_up(self):
+        tree = self.query_one("#tree", DirectoryTree)
+        current = tree.path
+        parent = current.parent
+
+        if parent == current:
+            return
+
+        self.replaceTree(parent)
+
+
+    def replaceTree(self, new_path: Path):
+        if self.__replacing:
+            pass
+
+        self._replacing = True
+
+        old = self.query_one("#tree", DirectoryTree)
+        parent = old.parent
+        old.remove()
+
+        def mount_new():
+            new = DirTree(new_path, self.filter, id="tree")
+            parent.mount(new)
+            self.path = new_path
+            self.update_breadcrumb(new_path)
+            self.refresh(layout=True)
+
+            self.__replacing = False
+
+        self.call_after_refresh(mount_new)
+
+
+    def update_breadcrumb(self, path: Path):
+        self.query_one("#breadcrumb", Label).update(path.as_posix())
 
 
     def compose(self) -> ComposeResult:
-        yield Label(self.title, id="lbl_img")
-        yield DirectoryTree(self.path, id="tree")
+        with Vertical(id="fileSelect"):
+            yield Label(self.title, id="lbl_img")
 
+            with Horizontal(id='toolbar'):
+                yield Button("↑", id="btn_up")
+                yield Label(self.path.as_posix(), id="breadcrumb")
+
+            yield DirTree(self.path, self.filter, id="tree")
+
+
+    @on(DirectoryTree.NodeExpanded)
+    def update_on_dir_enter(self, event: DirectoryTree.NodeExpanded):
+        self.path = event.node.path
+        self.update_breadcrumb(self.path)
 
     @on(DirectoryTree.FileSelected)
     def file_selected(self, event: DirectoryTree.FileSelected):
-        self.selected_path = event.path
-        
+        self.selected_file = event.path
 
     @on(DirectoryTree.NodeExpanded)
     @on(DirectoryTree.NodeCollapsed)
     def resize_tree(self):
         self.refresh(layout=True)
 
+    @on(Button.Pressed, "#btn_up")
+    def up_pressed(self):
+        self.action_go_up()
+
 
     @property
     def value(self):
-        return self.selected_path
+        return self.selected_file
+
+
 
 
 
@@ -101,82 +239,34 @@ class StegoApp(App):
     #Decode 0 / Encode 1
     mode = reactive(0)
 
-    imgPath = reactive(None)
-    filePathh = reactive(None)
-
-
-    def replaceImgTree(self, path):
-        parent = self.query_one("#imgSel", Vertical)
-        old = parent.query_one("#img_select", FileSelect)
-
-        old.remove()
-
-        def mount_new():
-            new = FileSelect(path,'Select image', id="img_select")
-            parent.mount(new)
-            parent.refresh(layout=True)
-
-        self.call_after_refresh(mount_new)
-
-
-    def replaceTxtTree(self, path):
-        parent = self.query_one("#txtSel", Vertical)
-        old = parent.query_one("#text_select", FileSelect)
-
-        old.remove()
-
-        def mount_new():
-            new = FileSelect(path, 'Select file to embed', id="text_select")
-            parent.mount(new)
-            parent.refresh(layout=True)
-
-        self.call_after_refresh(mount_new)
-    
-
 
     # --- ACTIONS ---
     BINDINGS = [
         ("d", "decode", "Decode")
         ,("e", "encode", "Encode")
-        #,("i", "imgRootPath", "Images")
-        #,("I", "imgProjPath", "Project Root")
-        #,("t", "txtRootPath", "Images")
-        #,("T", "txtProjPath", "Project Root")
         ,("r", "reload", "Reload")
         ,("q", "quit", "Quit")
         #,("^d", "toggleDark", "Toggle Dark")
     ]
 
+
     def action_reload(self):
-        self.replaceImgTree("./in/")
-        self.replaceTxtTree("./in/")
+        imgSel = self.query_one('#img_select', FileSelect)
+        txtSel = self.query_one('#text_select', FileSelect)
+
+        imgSel.replaceTree(imgSel.path)
+        txtSel.replaceTree(txtSel.path)
+
+        nameBox = self.query_one("#out_name", Input)
+        pwdBox = self.query_one("#pwd_in", Input)
+        nameBox.value = ''
+        pwdBox.value = ''
+        
 
 
     def action_toggleDark(self):
         self.dark = not self.dark
 
-    '''
-    def action_imgRootPath(self):
-        root = Path(PlatformDirs().user_pictures_dir)
-        if not root.exists():
-            root = Path.home()
-        self.replaceImgTree(root)
-
-    def action_imgProjPath(self):
-        root = './in/'
-        self.replaceImgTree(root)
-
-
-    def action_txtRootPath(self):
-        root = Path(PlatformDirs().user_documents_dir)
-        if not root.exists():
-            root = Path.home()
-        self.replaceTxtTree(root)
-
-    def action_txtProjPath(self):
-        root = './in/'
-        self.replaceTxtTree(root)
-    '''
 
     def action_decode(self):
         self.mode = 1
@@ -223,7 +313,8 @@ class StegoApp(App):
             if text is None:
                 self.notify("Please select a text file to encode.")
 
-        
+        self.action_reload()
+
         stego = Steganography(self.mode, outName, pwd, img, text)
         stego.run()
 
@@ -249,7 +340,7 @@ class StegoApp(App):
                 #Row 2
 
                 #Mode Switch
-                yield Static(id='tglSpacer')
+                yield Static(id='spacer_tgl')
 
                 with Horizontal(id="tgl"):
                     yield Static("Encode", id="lbl_encode")
@@ -258,29 +349,29 @@ class StegoApp(App):
                               
                 #Row 3
 
-                #In-File and e/d tgl
-                with Vertical(id="imgSel"):
-                    yield FileSelect("./in/", 'Select image', id="img_select")
-
-                with Vertical(id="txtSel"):
-                    yield FileSelect("./in/", 'Select file to embed', id="text_select")
-
-
+                #In-File
+                yield FileSelect("./in/", 'Select image', '.png', id="img_select")
+                
                 #Row 4
 
-                #Out-File
-                with Horizontal(id="out_file"):
-                    yield Label("Output File-Name:", id="lbl_out")
-                    yield Input(placeholder="encrypted.png", id="out_name")
-                
-                yield Static(id='outSpacer')
+                #File Select
+                yield FileSelect("./in/", 'Select file to embed', id="text_select")
                 
                 #Row 5
 
-                #PWD and Run
+                #Out-File and PWD
+                with Horizontal(id="out_file"):
+                    yield Label("Output File-Name:", id="lbl_out")
+                    yield Input(placeholder="encrypted.png", id="out_name")
+
                 with Horizontal(id="pwd"):
                     yield Label("Password:", id="lbl_pwd")
                     yield Input(password=True, placeholder="••••••", id="pwd_in")
+                                
+                #Row 6
+
+                #PWD and Run
+                yield Static(id='spacer_out')
 
                 with Horizontal(id="btn"):
                     yield Button("Run", id="btn_run")
