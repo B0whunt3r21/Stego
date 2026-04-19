@@ -272,13 +272,14 @@ class StegoApp(App):
         self.mode = 1
         toggle = self.query_one("#btn_toggle", Switch) #Sub rows to single classes for action handling?
         toggle.value = True
+        
 
 
     def action_encode(self):
         self.mode = 0
         toggle = self.query_one("#btn_toggle", Switch) #Sub rows to single classes for action handling?
         toggle.value = False
-
+        
 
     def action_select_image(self):
         self.push_screen(FileSelect())
@@ -289,8 +290,12 @@ class StegoApp(App):
 
         if mode == 0:   # encode
             fileSel.display = True
+            outName = self.query_one('#out_name', Input)
+            outName.placeholder = 'encoded.png'
         else:           # decode
             fileSel.display = False
+            outName = self.query_one('#out_name', Input)
+            outName.placeholder = 'message.txt'
 
   
     @on(Switch.Changed, "#btn_toggle")
@@ -310,6 +315,12 @@ class StegoApp(App):
             
         if self.mode == 0: #Encode
             text = self.query_one("#text_select", FileSelect).value
+            
+            if outName.endswith('.png'):
+                pass
+            else:
+                outName = outName + '.png'
+
             if text is None:
                 self.notify("Please select a text file to encode.")
 
@@ -362,7 +373,7 @@ class StegoApp(App):
                 #Out-File and PWD
                 with Horizontal(id="out_file"):
                     yield Label("Output File-Name:", id="lbl_out")
-                    yield Input(placeholder="encrypted.png", id="out_name")
+                    yield Input(placeholder="encoded.png", id="out_name")
 
                 with Horizontal(id="pwd"):
                     yield Label("Password:", id="lbl_pwd")

@@ -26,7 +26,7 @@ Also add the file you want to mask in the image to the folder.
 
  > python main.py
 
- After starting the application, a TUI interfare should appear where one can select the mode, input file(s) - depending en the mode, name the output file (.png in encode mode, .txt in decode mode), and set the password.
+ After starting the application, a TUI interfare should appear where one can select the mode, input file(s) - depending en the mode, name the output file (.png in encode mode can be omitted, arbitrary suffix in decode mode), and set the password.
 
 > [!WARNING]
  > For the encoding a lossless image type, like png is needed. jpg would currupt the data.
@@ -35,6 +35,6 @@ All the output file are to be found in the 'out' directory.
 
 
 ### TODO
- - Automatic output file type depending on mode. (.png | .txt ommitting)
+ - Labels Vertical alignment
  - Optional: Image embedding?
 

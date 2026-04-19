@@ -14,11 +14,51 @@ ROOT = os.path.dirname(os.path.realpath(__file__))
 
 class Steganography():
     def __init__(self, mode, out, pwd, img, txt=None):
-        self.mode = mode #0: Encode | 1: Decode
-        self.out = out
-        self.pwd = pwd
-        self.img = img
-        self.txt = txt
+        self.__mode = mode #0: Encode | 1: Decode
+        self.__out = out
+        self.__pwd = pwd
+        self.__img = img
+        self.__txt = txt
+
+    @property
+    def mode(self):
+        return self.__mode
+    
+    @mode.setter
+    def mode(self, mode):
+        self.__mode = mode
+
+    @property
+    def out(self):
+        return self.__out
+    
+    @out.setter
+    def out(self, out):
+        self.__out = out
+
+    @property
+    def pwd(self):
+        return self.__pwd
+    
+    @pwd.setter
+    def pwd(self, pwd):
+        self.__pwd = pwd
+
+    @property
+    def img(self):
+        return self.__img
+    
+    @img.setter
+    def img(self, img):
+        self.__img = img
+
+    @property
+    def txt(self):
+        return self.__txt
+    
+    @txt.setter
+    def txt(self, txt):
+        self.__txt = txt
 
          
     def __pixel_order(self, arr_len, password):
