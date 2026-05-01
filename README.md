@@ -36,5 +36,4 @@ All the output file are to be found in the 'out' directory.
 
 ### TODO
  - Labels Vertical alignment
- - Optional: Image embedding?
 

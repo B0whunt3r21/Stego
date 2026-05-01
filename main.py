@@ -84,15 +84,15 @@ class DirTree(DirectoryTree):
             path for path in paths
             if not path.name.startswith(".")
             ]
-        
+           
         if not self.selector:
             return filtered
         else:
+            allowed = {s.lower() for s in self.selector}
             return [
                 p for p in filtered
-                if p.is_dir() or p.suffix.lower() == self.selector.lower()
+                if p.is_dir() or p.suffix.lower() in allowed
             ]
-    
 
 
 
@@ -288,14 +288,10 @@ class StegoApp(App):
     def watch_mode(self, mode: int):
         fileSel = self.query_one("#text_select", FileSelect)
 
-        if mode == 0:   # encode
+        if mode == 0: #encode
             fileSel.display = True
-            outName = self.query_one('#out_name', Input)
-            outName.placeholder = 'encoded.png'
-        else:           # decode
+        else: #decode
             fileSel.display = False
-            outName = self.query_one('#out_name', Input)
-            outName.placeholder = 'message.txt'
 
   
     @on(Switch.Changed, "#btn_toggle")
@@ -306,27 +302,21 @@ class StegoApp(App):
     @on(Button.Pressed, "#btn_run")
     def execute(self):
         img = self.query_one("#img_select", FileSelect).value
-        outName = self.query_one("#out_name", Input).value
         pwd = self.query_one("#pwd_in", Input).value
         text = None
-
+        
         if img is None:
             self.notify("Please select an image.")
             
         if self.mode == 0: #Encode
             text = self.query_one("#text_select", FileSelect).value
             
-            if outName.endswith('.png'):
-                pass
-            else:
-                outName = outName + '.png'
-
             if text is None:
                 self.notify("Please select a text file to encode.")
 
         self.action_reload()
 
-        stego = Steganography(self.mode, outName, pwd, img, text)
+        stego = Steganography(self.mode, pwd, img, text)
         stego.run()
 
 
@@ -361,7 +351,7 @@ class StegoApp(App):
                 #Row 3
 
                 #In-File
-                yield FileSelect("./in/", 'Select image', '.png', id="img_select")
+                yield FileSelect("./in/", 'Select image', ['.png', '.jpg', '.jpeg'], id="img_select")
                 
                 #Row 4
 
@@ -370,23 +360,13 @@ class StegoApp(App):
                 
                 #Row 5
 
-                #Out-File and PWD
-                with Horizontal(id="out_file"):
-                    yield Label("Output File-Name:", id="lbl_out")
-                    yield Input(placeholder="encoded.png", id="out_name")
-
+                #PWD and Out-File
                 with Horizontal(id="pwd"):
                     yield Label("Password:", id="lbl_pwd")
                     yield Input(password=True, placeholder="••••••", id="pwd_in")
-                                
-                #Row 6
-
-                #PWD and Run
-                yield Static(id='spacer_out')
 
                 with Horizontal(id="btn"):
                     yield Button("Run", id="btn_run")
-
 
         yield Footer()
 
